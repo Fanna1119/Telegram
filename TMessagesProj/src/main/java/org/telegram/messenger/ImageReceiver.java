@@ -850,6 +850,20 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         return staticThumbDrawable;
     }
 
+    /**
+     * Removes the blurred static thumbnail placeholder and resets the crossfade state so that
+     * the already-loaded full image is rendered at full opacity on the next draw pass.
+     * Call only after confirming via {@link ImageReceiverDelegate#didSetImage} that the full
+     * image (not a thumb) has been set (i.e. {@code set=true, thumb=false}).
+     */
+    public void clearStaticThumb() {
+        crossfadeWithThumb = false;
+        currentAlpha = 1.0f;
+        previousAlpha = 1.0f;
+        setStaticDrawable(null);
+        staticThumbShader = null;
+    }
+
     public int getAnimatedOrientation() {
         AnimatedFileDrawable animation = getAnimation();
         return animation != null ? animation.getOrientation() : 0;

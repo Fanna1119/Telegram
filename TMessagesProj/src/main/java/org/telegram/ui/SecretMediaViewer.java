@@ -1531,6 +1531,16 @@ public class SecretMediaViewer implements NotificationCenter.NotificationCenterD
         } else {
             actionBar.setTitle(LocaleController.getString(R.string.DisappearingPhoto));
             TLRPC.PhotoSize sizeFull = FileLoader.getClosestPhotoSizeWithSize(messageObject.photoThumbs, AndroidUtilities.getPhotoSize());
+            // Fix: once the full-resolution bitmap is delivered, drop the blurred placeholder
+            // and snap alpha to 1 so the sharp image appears immediately without a crossfade
+            // gap or stalled-animation regression (see bug #18201).
+            centerImage.setDelegate((imageReceiver, set, thumb, memCache) -> {
+                if (set && !thumb) {
+                    imageReceiver.setDelegate(null);
+                    imageReceiver.clearStaticThumb();
+                    containerView.invalidate();
+                }
+            });
             centerImage.setImage(ImageLocation.getForObject(sizeFull, messageObject.photoThumbsObject), null, currentThumb != null ? new BitmapDrawable(currentThumb.bitmap) : null, -1, null, messageObject, 2);
 
             if (sizeFull != null) {
